@@ -52,6 +52,19 @@ func TestDequeue(t *testing.T) {
 	}
 }
 
+func TestEnqueue(t *testing.T) {
+	queue := StubQueue{}
+	server := &QueueServer{&queue}
+
+	request, _ := http.NewRequest(http.MethodPost, "/enqueue", nil)
+	response := httptest.NewRecorder()
+
+	server.ServeHTTP(response, request)
+
+	assertStatusCode(t, response.Code, http.StatusAccepted)
+
+}
+
 func MakeDequeueRequest() *http.Request {
 	request, _ := http.NewRequest(http.MethodPost, "/dequeue", nil)
 	return request
