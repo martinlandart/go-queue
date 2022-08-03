@@ -40,7 +40,7 @@ func TestDequeue(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			queue := StubQueue{item: test.dequeuedItem}
-			server := &QueueServer{&queue}
+			server := NewQueueServer(&queue)
 
 			request := NewDequeueRequest()
 			response := httptest.NewRecorder()
@@ -56,7 +56,7 @@ func TestDequeue(t *testing.T) {
 func TestEnqueue(t *testing.T) {
 	t.Run("returns 400 on empty body", func(t *testing.T) {
 		queue := StubQueue{}
-		server := &QueueServer{&queue}
+		server := NewQueueServer(&queue)
 
 		request := NewEnqueueRequest("")
 		response := httptest.NewRecorder()
@@ -68,7 +68,7 @@ func TestEnqueue(t *testing.T) {
 
 	t.Run("enqueues item", func(t *testing.T) {
 		queue := StubQueue{}
-		server := &QueueServer{&queue}
+		server := NewQueueServer(&queue)
 		item := "item"
 
 		request := NewEnqueueRequest(item)
@@ -86,6 +86,10 @@ func TestEnqueue(t *testing.T) {
 			t.Errorf("did not store correct item, got %q want %q", queue.enqueueCalls[0], item)
 		}
 	})
+}
+
+func NewQueueServer(queue Queue) *QueueServer {
+	return &QueueServer{queue: queue}
 }
 
 func NewDequeueRequest() *http.Request {
