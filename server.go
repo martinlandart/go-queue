@@ -1,9 +1,13 @@
 package main
 
-import "net/http"
+import (
+	"io/ioutil"
+	"net/http"
+)
 
 type Queue interface {
 	Dequeue() string
+	Enqueue(item string)
 }
 
 type QueueServer struct {
@@ -14,8 +18,15 @@ func (q QueueServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	router := http.NewServeMux()
 
 	router.Handle("/enqueue", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		item, _ := ioutil.ReadAll(r.Body)
+
+		if len(item) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		q.queue.Enqueue(string(item))
+
 		w.WriteHeader(http.StatusAccepted)
-		return
 	}))
 
 	router.Handle("/dequeue", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

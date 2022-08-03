@@ -1,17 +1,23 @@
 package main
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 type StubQueue struct {
-	item string
+	item         string
+	enqueueCalls []string
 }
 
 func (s *StubQueue) Dequeue() string {
 	return s.item
+}
+
+func (s *StubQueue) Enqueue(item string) {
+	s.enqueueCalls = append(s.enqueueCalls, item)
 }
 
 func TestDequeue(t *testing.T) {
@@ -36,37 +42,61 @@ func TestDequeue(t *testing.T) {
 			queue := StubQueue{item: test.dequeuedItem}
 			server := &QueueServer{&queue}
 
-			request := MakeDequeueRequest()
+			request := NewDequeueRequest()
 			response := httptest.NewRecorder()
 
 			server.ServeHTTP(response, request)
 
 			assertStatusCode(t, response.Code, test.expectedHTTPStatus)
-
-			want := test.dequeuedItem
-			got := response.Body.String()
-			if got != want {
-				t.Errorf("expected empty response but got %q", got)
-			}
+			assertResponseBody(t, response.Body.String(), test.dequeuedItem)
 		})
 	}
 }
 
 func TestEnqueue(t *testing.T) {
-	queue := StubQueue{}
-	server := &QueueServer{&queue}
+	t.Run("returns 400 on empty body", func(t *testing.T) {
+		queue := StubQueue{}
+		server := &QueueServer{&queue}
 
-	request, _ := http.NewRequest(http.MethodPost, "/enqueue", nil)
-	response := httptest.NewRecorder()
+		request := NewEnqueueRequest("")
+		response := httptest.NewRecorder()
 
-	server.ServeHTTP(response, request)
+		server.ServeHTTP(response, request)
 
-	assertStatusCode(t, response.Code, http.StatusAccepted)
+		assertStatusCode(t, response.Code, http.StatusBadRequest)
+	})
 
+	t.Run("enqueues item", func(t *testing.T) {
+		queue := StubQueue{}
+		server := &QueueServer{&queue}
+		item := "item"
+
+		request := NewEnqueueRequest(item)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		assertStatusCode(t, response.Code, http.StatusAccepted)
+
+		if len(queue.enqueueCalls) != 1 {
+			t.Errorf("got %d calls to Enqueue, want %d", len(queue.enqueueCalls), 1)
+		}
+
+		if queue.enqueueCalls[0] != item {
+			t.Errorf("did not store correct item, got %q want %q", queue.enqueueCalls[0], item)
+		}
+	})
 }
 
-func MakeDequeueRequest() *http.Request {
+func NewDequeueRequest() *http.Request {
 	request, _ := http.NewRequest(http.MethodPost, "/dequeue", nil)
+	return request
+}
+
+func NewEnqueueRequest(item string) *http.Request {
+	bodyReader := bytes.NewReader([]byte(item))
+	request, _ := http.NewRequest(http.MethodPost, "/enqueue", bodyReader)
+
 	return request
 }
 
@@ -74,5 +104,12 @@ func assertStatusCode(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("expected status code %v got %v", want, got)
+	}
+}
+
+func assertResponseBody(t testing.TB, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("response body is wrong, got %q want %q", got, want)
 	}
 }
