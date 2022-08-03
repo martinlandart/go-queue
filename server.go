@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+func NewQueueServer(queue Queue) *QueueServer {
+	return &QueueServer{queue: queue}
+}
+
 type Queue interface {
 	Dequeue() string
 	Enqueue(item string)

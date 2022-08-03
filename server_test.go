@@ -88,10 +88,6 @@ func TestEnqueue(t *testing.T) {
 	})
 }
 
-func NewQueueServer(queue Queue) *QueueServer {
-	return &QueueServer{queue: queue}
-}
-
 func NewDequeueRequest() *http.Request {
 	request, _ := http.NewRequest(http.MethodPost, "/dequeue", nil)
 	return request

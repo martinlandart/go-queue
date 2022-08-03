@@ -37,7 +37,6 @@ func TestEnqueueingAndDequeueing(t *testing.T) {
 			server.ServeHTTP(response, request)
 
 			assertStatusCode(t, response.Code, http.StatusOK)
-
 			assertResponseBody(t, response.Body.String(), want[i])
 		}
 	})
