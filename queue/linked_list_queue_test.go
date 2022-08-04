@@ -1,6 +1,9 @@
 package queue
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestQueue(t *testing.T) {
 
@@ -40,6 +43,18 @@ func TestQueue(t *testing.T) {
 		queue.Dequeue()
 		got := queue.Dequeue()
 		assertEquals(t, got, "item2")
+	})
+	t.Run("enqueue ten items and dequeue nine items", func(t *testing.T) {
+		queue := LinkedListQueue{}
+		for i := 0; i < 10; i++ {
+			queue.Enqueue(fmt.Sprintf("item%v", i))
+		}
+
+		for i := 0; i < 8; i++ {
+			queue.Dequeue()
+		}
+		got := queue.Dequeue()
+		assertEquals(t, got, "item8")
 	})
 }
 
