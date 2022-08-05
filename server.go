@@ -36,7 +36,7 @@ func (q QueueServer) enqueueHandler(w http.ResponseWriter, r *http.Request) {
 
 	q.queue.Enqueue(string(item))
 
-	w.WriteHeader(http.StatusAccepted)
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (q QueueServer) dequeueHandler(w http.ResponseWriter, r *http.Request) {

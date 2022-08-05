@@ -76,7 +76,7 @@ func TestEnqueue(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		assertStatusCode(t, response.Code, http.StatusAccepted)
+		assertStatusCode(t, response.Code, http.StatusCreated)
 
 		if len(queue.enqueueCalls) != 1 {
 			t.Errorf("got %d calls to Enqueue, want %d", len(queue.enqueueCalls), 1)
