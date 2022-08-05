@@ -31,23 +31,20 @@ func (l *LinkedListQueue) Enqueue(item string) {
 }
 
 func (l *LinkedListQueue) Dequeue() string {
-	// 2 or more in queue
-	if l.head != l.end && l.head != nil && l.end != nil {
-		value := l.head.value
-		l.head = l.head.next
-		return value
+	if l.isEmptyQueue() {
+		return ""
 	}
 
-	// 1 in queue
-	if l.head != nil && l.end != nil && l.head == l.end {
+	if l.isQueueOfLengthOne() {
 		value := l.head.value
 		l.head = nil
 		l.end = nil
 		return value
 	}
 
-	// empty queue
-	return ""
+	value := l.head.value
+	l.head = l.head.next
+	return value
 }
 
 func (l *LinkedListQueue) isEmptyQueue() bool {

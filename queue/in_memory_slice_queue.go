@@ -1,4 +1,4 @@
-package main
+package queue
 
 type InMemorySliceQueue struct {
 	queue []string
