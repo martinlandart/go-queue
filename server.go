@@ -32,6 +32,7 @@ func (q QueueServer) enqueueHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(item) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	q.queue.Enqueue(string(item))
@@ -44,8 +45,8 @@ func (q QueueServer) dequeueHandler(w http.ResponseWriter, r *http.Request) {
 
 	if res == "" {
 		w.WriteHeader(http.StatusNoContent)
-	} else {
-		w.Write([]byte(res))
-		w.WriteHeader(http.StatusOK)
+		return
 	}
+
+	w.Write([]byte(res))
 }
